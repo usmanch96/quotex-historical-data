@@ -211,7 +211,7 @@ class Quotex:
 
         return candles
 
-    async def get_candles_deep(self, asset, amount_of_seconds, period, timeout=DEFAULT_TIMEOUT):
+    async def get_candles_deep(self, asset, amount_of_seconds, period, timeout=DEFAULT_TIMEOUT, progress_callback=None):
         """
         Deep recursive candle fetcher bypassing the broker's 200 candle limit.
         Uses exact Quotex browser WebSocket pagination formats to stitch history together.
@@ -293,7 +293,12 @@ class Quotex:
             # Update iterator anchor
             times = sorted([c['time'] for c in raw_candles])
             oldest_time = times[0]
-            
+
+            # Report progress to caller if callback provided
+            if progress_callback:
+                fetched_seconds = current_time - oldest_time
+                progress_callback(fetched_seconds, amount_of_seconds, len(all_candles))
+
             # Minor anti-rate-limit throttle
             await asyncio.sleep(0.5)
             

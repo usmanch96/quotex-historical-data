@@ -18,7 +18,7 @@ import time
 import asyncio
 import csv
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 try:
     from dotenv import load_dotenv
@@ -41,6 +41,32 @@ if not EMAIL or not PASSWORD:
     print("ERROR: Credentials not set.")
     print("  Copy .env.example to .env and fill in your QUOTEX_EMAIL and QUOTEX_PASSWORD.")
     sys.exit(1)
+
+def print_progress(fetched_seconds, total_seconds, candle_count, start_ts):
+    """Prints a live updating progress bar to the terminal."""
+    pct = min(fetched_seconds / total_seconds, 1.0) if total_seconds > 0 else 0
+    bar_len = 35
+    filled = int(bar_len * pct)
+    bar = "█" * filled + "░" * (bar_len - filled)
+
+    elapsed = time.time() - start_ts
+    if pct > 0.01:
+        eta_secs = (elapsed / pct) * (1 - pct)
+        eta_str = str(timedelta(seconds=int(eta_secs)))
+    else:
+        eta_str = "calculating..."
+
+    days_fetched = fetched_seconds / 86400
+
+    # \r goes back to start of line — overwrites without scrolling
+    print(
+        f"\r  [{bar}] {pct*100:5.1f}%  "
+        f"{days_fetched:.2f} days  "
+        f"{candle_count:,} candles  "
+        f"⏱ {elapsed:.0f}s  ETA {eta_str}   ",
+        end="", flush=True
+    )
+
 
 def analyze_data(candles, period):
     """Performs validation checks on the retrieved candles."""
@@ -136,14 +162,25 @@ async def main():
         print(f"WARNING: Asset {asset} is currently CLOSED on the broker.")
         # We can still attempt fetch, some brokers allow fetching history of closed assets.
 
-    print(f"\nStarted Deep Fetch for {days} Days of {asset_name} data ({period}s timeframe)...")
-    print("Please wait, this might take a few minutes depending on the duration...")
+    print(f"\n🚀 Starting deep fetch: {days} days of {asset_name} ({period}s candles)")
+    print(f"   Estimated candles: ~{int(duration_seconds / period):,}")
+    print()
+
     start_time = time.time()
-    
-    all_candles = await client.get_candles_deep(asset_name, duration_seconds, period)
-    
+
+    def on_progress(fetched_secs, total_secs, count):
+        print_progress(fetched_secs, total_secs, count, start_time)
+
+    all_candles = await client.get_candles_deep(
+        asset_name, duration_seconds, period,
+        progress_callback=on_progress
+    )
+
+    # Move to next line after progress bar
+    print()
+
     fetch_time = time.time() - start_time
-    print(f"\nFetch complete in {fetch_time:.1f} seconds! Retrieved {len(all_candles)} candles.")
+    print(f"✅ Fetch complete in {fetch_time:.1f}s — Retrieved {len(all_candles):,} candles.")
     
     if all_candles:
         # Generate safe filename
