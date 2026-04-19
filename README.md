@@ -163,8 +163,26 @@ asyncio.run(main())
 
 ## 📈 Supported Assets & Timeframes
 
-**🕐 Timeframes (seconds):**
-`5` `10` `15` `30` `60` `120` `300` `600` `900` `1800` `3600` `7200` `14400` `86400`
+**🕐 Valid Timeframes — enter the number in seconds:**
+
+| Seconds | What it means |
+|---|---|
+| `5` | 5 seconds |
+| `10` | 10 seconds |
+| `15` | 15 seconds |
+| `30` | 30 seconds |
+| `60` | **1 minute** ← most popular |
+| `120` | 2 minutes |
+| `300` | **5 minutes** |
+| `600` | 10 minutes |
+| `900` | 15 minutes |
+| `1800` | 30 minutes |
+| `3600` | 1 hour |
+| `7200` | 2 hours |
+| `14400` | 4 hours |
+| `86400` | 1 day |
+
+> ⚠️ **Don't use `1` for 1 minute.** Enter `60` for 1 minute. The script asks for **seconds**, not minutes.
 
 **💱 OTC Assets** (24/7 — recommended for data collection):
 `EURUSD_otc` `USDPKR_otc` `XAUUSD_otc` `USDINR_otc` `GBPUSD_otc` `USDJPY_otc` and more
