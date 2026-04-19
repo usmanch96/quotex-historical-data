@@ -1,0 +1,45 @@
+# ===========================
+# SECURITY — NEVER COMMIT
+# ===========================
+.env
+session.json
+*.json
+
+# ===========================
+# DATA FILES — TOO LARGE
+# ===========================
+*.csv
+*.zip
+debug.zip
+
+# ===========================
+# OLD CHAT / PERSONAL NOTES
+# ===========================
+oldchat*.md
+"oldchat just now.md"
+
+# ===========================
+# PYTHON ENVIRONMENTS
+# ===========================
+.venv/
+.venv311/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ===========================
+# IDE / SYSTEM FILES
+# ===========================
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
