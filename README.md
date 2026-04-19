@@ -203,17 +203,21 @@ Python 3.9+ (matches pyquotex requirements).
 
 ```
 quotex-historical-data/
-├── 📄 download_data.py          # Interactive downloader — run this
+├── 📄 download_data.py     # Interactive CLI downloader — run this
+├── 📄 walkthrough.md       # Technical deep-dive: how the fix was found
+├── 📄 .env.example         # Copy to .env and fill in your credentials
 ├── 📁 pyquotex/
-│   ├── stable_api.py            # Patched — adds get_candles_deep()
+│   ├── stable_api.py       # ⭐ Patched — adds get_candles_deep()
+│   ├── api.py
+│   ├── config.py
+│   ├── expiration.py
+│   ├── global_value.py
+│   ├── http/               # HTTP login, session, history
+│   ├── utils/              # Indicators, processors, optimization
 │   └── ws/
-│       └── client.py            # Patched — fixes pagination parser
-├── 📁 examples/                 # Example scripts
-├── 📁 test/                     # Test scripts used during development
-├── 📁 docs/                     # Full API reference
-├── 📄 walkthrough.md            # Technical deep-dive: how the fix was found
-├── 📄 pyquotex_api_reference.md # Complete pyquotex API docs
-├── 📄 .env.example              # Copy to .env and add your credentials
+│       ├── client.py       # ⭐ Patched — fixes pagination parser
+│       ├── channels/       # WebSocket message channels
+│       └── objects/        # Data containers
 └── 📄 README.md
 ```
 
