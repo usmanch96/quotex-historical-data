@@ -186,30 +186,41 @@ async def main():
         # Generate safe filename
         safe_asset_name = asset_name.replace("/", "_")
         csv_filename = f"{safe_asset_name}_{period}s_{days}days.csv"
-        
+
+        skipped = 0
+        written = 0
         with open(csv_filename, mode='w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(['timestamp', 'datetime', 'open', 'high', 'low', 'close', 'ticks'])
-            
+
             for c in all_candles:
+                # Some tick-based candles may be missing OHLC — skip them gracefully
+                op   = c.get('open')
+                hi   = c.get('high')
+                lo   = c.get('low')
+                cl   = c.get('close')
+                if None in (op, hi, lo, cl):
+                    skipped += 1
+                    continue
                 dt_str = datetime.fromtimestamp(c['time']).strftime('%Y-%m-%d %H:%M:%S')
                 writer.writerow([
                     c['time'],
                     dt_str,
-                    c['open'],
-                    c['high'],
-                    c['low'],
-                    c['close'],
+                    op, hi, lo, cl,
                     c.get('ticks', 0)
                 ])
-                
-        print(f"Saved cleanly to: {csv_filename}")
-        
-        # Analyze
-        analyze_data(all_candles, period)
+                written += 1
+
+        if skipped:
+            print(f"⚠️  Skipped {skipped:,} incomplete candles (missing OHLC — normal for 1s timeframe).")
+        print(f"💾 Saved {written:,} candles to: {csv_filename}")
+
+        # Analyze only complete candles
+        complete = [c for c in all_candles if c.get('open') is not None]
+        analyze_data(complete, period)
     else:
-        print("FAILED to retrieve any candles.")
-        
+        print("❌ FAILED to retrieve any candles.")
+
     await client.close()
 
 if __name__ == "__main__":
