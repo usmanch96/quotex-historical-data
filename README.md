@@ -224,11 +224,20 @@ quotex-historical-data/
 ├── 📄 download_data.py     # Interactive CLI downloader — run this
 ├── 📄 verify_data.py       # Validates downloaded CSVs for gaps & authenticity
 ├── 📄 walkthrough.md       # Technical deep-dive: how the fix was found
+├── 📄 .env.example         # Copy to .env and fill in your credentials
+├── 📁 pyquotex/
+│   ├── stable_api.py       # ⭐ Patched — adds get_candles_deep()
+│   ├── api.py
+│   ├── config.py
+│   ├── expiration.py
+│   ├── global_value.py
+│   ├── http/               # HTTP login, session, history
+│   ├── utils/              # Indicators, processors, optimization
 │   └── ws/
 │       ├── client.py       # ⭐ Patched — fixes pagination parser
 │       ├── channels/       # WebSocket message channels
 │       └── objects/        # Data containers
-└── 📄 README.md
+└── 📄 README.md            # You are here
 ```
 
 ---
