@@ -227,7 +227,6 @@ class Quotex:
         # Determine initial time boundary
         current_time = int(time.time())
         chunk_offset = 3600 # Brokers generally use 3600 (1 hour chunks) for pagination
-        step_back = 2940    # 49 min backward steps (for 60s period overlap)
         
         self.start_candles_stream(asset, period)
         
@@ -244,7 +243,8 @@ class Quotex:
         
         # 2. Iteratively paginate backward using raw WS custom payloads
         while oldest_time > target_oldest_time:
-            fetch_time = oldest_time - step_back
+            # Anchor exactly to the oldest candle we have to ensure 0 seconds of skipped data
+            fetch_time = oldest_time
             
             # Browser simulates 12-digit exact match epoch indexes for deep history packets
             browser_index = int(time.time() * 100)
@@ -285,14 +285,19 @@ class Quotex:
                 if c['time'] not in all_candles:
                     all_candles[c['time']] = c
                     new_count += 1
-                    
-            if new_count == 0:
-                logger.debug("Pagination hit maximum available historical depth for this asset.")
-                break
-                
-            # Update iterator anchor
-            times = sorted([c['time'] for c in raw_candles])
-            oldest_time = times[0]
+            
+            # Update iterator anchor seamlessly
+            if len(raw_candles) == 0:
+                # We hit a genuine dead zone (weekend/market closed) with NO candles returned.
+                # If we break, we stop fetching forever. Instead, we manually step back to jump the gap.
+                oldest_time -= chunk_offset
+            else:
+                times = sorted([c['time'] for c in raw_candles])
+                # If broker returned exactly 1 duplicate candle or something older, ensure we move backward
+                if times[0] >= oldest_time:
+                    oldest_time -= chunk_offset
+                else:
+                    oldest_time = times[0]
 
             # Report progress to caller if callback provided
             if progress_callback:
